@@ -1,0 +1,216 @@
+/* style.css */
+
+/* Variables de Color */
+:root {
+    --color-principal: #8B0000; /* Rojo Guinda Oscuro */
+    --color-fondo: #F5F5F5; /* Fondo claro general */
+    --color-texto: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--color-fondo);
+    margin: 0;
+    padding: 0;
+    color: var(--color-texto);
+}
+
+/* --- ENCABEZADO --- */
+.header-principal {
+    background-color: var(--color-principal);
+    color: white;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header-principal .logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.header-principal .logo {
+    width: 50px; 
+    height: auto;
+    margin-right: 15px;
+}
+
+.header-principal h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.cerrar-sesion {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.cerrar-sesion:hover {
+    background-color: white;
+    color: var(--color-principal);
+}
+
+/* --- CONTENEDORES --- */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.titulo-area {
+    font-size: 2em;
+    color: var(--color-principal);
+    margin-bottom: 10px;
+}
+
+/* Estilo general para botones de formularios (fuera del panel) */
+button, .btn {
+    background-color: var(--color-principal);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover {
+    background-color: #A52A2A;
+}
+
+
+/* --- ESTILOS DEL LOGIN (CENTRADITO Y GUINDA) --- */
+
+.login-body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5; /* Gris clarito de fondo */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.logo-dif {
+    width: 110px;
+    margin-bottom: 15px;
+}
+
+.titulo-login {
+    color: var(--color-principal);
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.subtitulo-login {
+    color: #777;
+    font-size: 0.9em;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #444;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box; /* Para que no se salga de la caja */
+}
+
+.btn-entrar {
+    width: 100%;
+    background-color: var(--color-principal);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    transition: 0.3s ease;
+}
+
+.btn-entrar:hover {
+    background-color: #6a0000;
+}
+
+.footer-login {
+    margin-top: 30px;
+    font-size: 0.8em;
+    color: #bbb;
+}
+
+.botones-header {
+    display: flex;
+    gap: 15px; /* Crea espacio entre los dos botones */
+    align-items: center;
+}
+
+.btn-inicio {
+    background-color: rgba(255, 255, 255, 0.2); /* Blanco semi-transparente */
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: 1px solid white;
+    transition: 0.3s;
+}
+
+.btn-inicio:hover {
+    background-color: white;
+    color: #8B0000; /* Cambia al color guinda de tu sistema al pasar el mouse */
+}
+
+
+
+/* Pone el borde rojo si el teléfono no tiene 10 números */
+input[name="telefono"]:invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.2);
+}
+
+/* Pone el borde verde cuando ya están los 10 números */
+input[name="telefono"]:valid {
+    border-color: #28a745;
+}
