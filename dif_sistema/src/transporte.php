@@ -17,13 +17,18 @@ if (isset($_POST['guardar_servicio'])) {
     $ruta = $conexion->real_escape_string($_POST['ruta_destino']);
     $tipo_servicio = $conexion->real_escape_string($_POST['tipo_servicio']);
     $pasajeros = intval($_POST['pasajeros_pasajeras']);
+    $acompanantes = intval($_POST['acompanantes']);
     $fecha = $_POST['fecha_servicio'];
+    $hora_salida = $_POST['hora_salida'];
+    $hora_regreso = $_POST['hora_regreso'];
+    $km_inicial = intval($_POST['km_inicial']);
+    $km_final = intval($_POST['km_final']);
     $estatus = $conexion->real_escape_string($_POST['estatus_mantenimiento']);
     $observaciones = $conexion->real_escape_string($_POST['observaciones']);
     $usuario_atiende = $_SESSION['usuario'];
 
-    $sql = "INSERT INTO transporte (folio_servicio, unidad, operador, ruta_destino, tipo_servicio, pasajeros_pasajeras, fecha_servicio, estatus_mantenimiento, observaciones, usuario_atiende) 
-            VALUES ('$folio', '$unidad', '$operador', '$ruta', '$tipo_servicio', '$pasajeros', '$fecha', '$estatus', '$observaciones', '$usuario_atiende')";
+    $sql = "INSERT INTO transporte (folio_servicio, unidad, operador, ruta_destino, tipo_servicio, pasajeros_pasajeras, acompanantes, fecha_servicio, hora_salida, hora_regreso, km_inicial, km_final, estatus_mantenimiento, observaciones, usuario_atiende) 
+            VALUES ('$folio', '$unidad', '$operador', '$ruta', '$tipo_servicio', '$pasajeros', '$acompanantes', '$fecha', '$hora_salida', '$hora_regreso', '$km_inicial', '$km_final', '$estatus', '$observaciones', '$usuario_atiende')";
 
     if ($conexion->query($sql) === TRUE) {
         $mensaje = "¡Servicio de transporte registrado con folio $folio!";
@@ -138,7 +143,7 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
         }
 
         .main-card {
-            max-width: 1050px;
+            max-width: 1150px;
             margin: 35px auto;
             background: white;
             border-radius: 12px;
@@ -211,6 +216,13 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
             box-shadow: 0 0 0 3px rgba(96, 20, 36, 0.1);
         }
 
+        .km-calc-info {
+            font-size: 0.8em;
+            color: #27ae60;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
         .btn-submit-container {
             margin-top: 30px;
         }
@@ -235,6 +247,47 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
 
         .table-section {
             margin-top: 40px;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 9px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-filter {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #555;
+            transition: 0.2s;
+        }
+
+        .btn-filter:hover, .btn-filter.active {
+            background: #2d3142;
+            color: white;
+            border-color: #2d3142;
         }
 
         .table-wrapper {
@@ -293,6 +346,21 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
             font-weight: bold;
             font-size: 0.8em;
         }
+
+        .btn-accion {
+            padding: 5px 10px;
+            background: #601424;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-accion:hover {
+            background: #400d17;
+        }
     </style>
 </head>
 <body>
@@ -317,20 +385,20 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
         <div class="card-content">
             <h2 class="section-title">REGISTRO DE SERVICIO O RUTA DE TRANSPORTE</h2>
 
-            <form action="transporte.php" method="POST">
+            <form action="transporte.php" method="POST" id="formTransporte">
                 
                 <div class="sub-header">1. UNIDAD Y OPERADOR</div>
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Unidad / Vehículo</label>
                         <select name="unidad" required>
-    <option value="Unidad 01 - Nissan Urvan Adaptada">Unidad 01 - Nissan Urvan Adaptada</option>
-    <option value="Unidad 02 - Chevrolet Aveo">Unidad 02 - Chevrolet Aveo</option>
-    <option value="Unidad 03 - Ford Transit Custom">Unidad 03 - Ford Transit Custom</option>
-    <option value="Unidad 04 - Nissan NP300 Pick-Up">Unidad 04 - Nissan NP300 Pick-Up</option>
-    <option value="Unidad 05 - Toyota Avanza">Unidad 05 - Toyota Avanza</option>
-    <option value="Unidad 06 - Nissan March">Unidad 06 - Nissan March</option>
-</select>
+                            <option value="Unidad 01 - Nissan Urvan Adaptada">Unidad 01 - Nissan Urvan Adaptada</option>
+                            <option value="Unidad 02 - Chevrolet Aveo">Unidad 02 - Chevrolet Aveo</option>
+                            <option value="Unidad 03 - Ford Transit Custom">Unidad 03 - Ford Transit Custom</option>
+                            <option value="Unidad 04 - Nissan NP300 Pick-Up">Unidad 04 - Nissan NP300 Pick-Up</option>
+                            <option value="Unidad 05 - Toyota Avanza">Unidad 05 - Toyota Avanza</option>
+                            <option value="Unidad 06 - Nissan March">Unidad 06 - Nissan March</option>
+                        </select>
                     </div>
 
                     <div class="input-group">
@@ -366,8 +434,13 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
                     </div>
 
                     <div class="input-group">
-                        <label>Pasajeros / Usuarios Transportados</label>
+                        <label>Pasajeros / Usuarios</label>
                         <input type="number" name="pasajeros_pasajeras" min="1" value="1" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Acompañantes / Tutores</label>
+                        <input type="number" name="acompanantes" min="0" value="0">
                     </div>
 
                     <div class="input-group">
@@ -376,6 +449,27 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
                     </div>
 
                     <div class="input-group">
+                        <label>Hora de Salida</label>
+                        <input type="time" name="hora_salida">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Hora de Retorno</label>
+                        <input type="time" name="hora_regreso">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Kilometraje Inicial (Km)</label>
+                        <input type="number" name="km_inicial" id="km_inicial" placeholder="Ej. 45000" value="0">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Kilometraje Final (Km)</label>
+                        <input type="number" name="km_final" id="km_final" placeholder="Ej. 45120" value="0">
+                        <span id="kmCalculado" class="km-calc-info"></span>
+                    </div>
+
+                    <div class="input-group span-2">
                         <label>Observaciones / Bitácora</label>
                         <input type="text" name="observaciones" placeholder="Ej. Sin incidentes, retorno 16:00 hrs">
                     </div>
@@ -388,41 +482,64 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
 
             <div class="table-section">
                 <div class="sub-header">3. HISTORIAL DE SERVICIOS Y RUTAS REALIZADAS</div>
+                
+                <!-- Controles Interactivos de Búsqueda y Filtros -->
+                <div class="table-controls">
+                    <input type="text" id="buscadorTabla" class="search-box" placeholder="🔍 Buscar por folio, chofer, ruta o tipo de servicio...">
+                    <div class="filter-buttons">
+                        <button class="btn-filter active" onclick="filtrarTabla('todos', this)">Todos</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Optimo', this)">Óptimo</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Mantenimiento', this)">Mantenimiento</button>
+                    </div>
+                </div>
+
                 <div class="table-wrapper">
-                    <table>
+                    <table id="tablaTransporte">
                         <thead>
                             <tr>
                                 <th>Folio</th>
                                 <th>Unidad</th>
                                 <th>Operador</th>
                                 <th>Ruta / Destino</th>
-                                <th>Usuarios</th>
-                                <th>Fecha</th>
+                                <th>Pasajeros</th>
+                                <th>Fecha / Horario</th>
+                                <th>Km Recorridos</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if ($resultado_registros && $resultado_registros->num_rows > 0): ?>
-                                <?php while ($row = $resultado_registros->fetch_assoc()): ?>
-                                    <tr>
+                                <?php while ($row = $resultado_registros->fetch_assoc()): 
+                                    $km_recorridos = ($row['km_final'] > $row['km_inicial']) ? ($row['km_final'] - $row['km_inicial']) : 0;
+                                    $estado_simple = (strpos($row['estatus_mantenimiento'], 'Optima') !== false) ? 'Optimo' : 'Mantenimiento';
+                                ?>
+                                    <tr data-estado="<?php echo $estado_simple; ?>">
                                         <td><span class="badge-folio"><?php echo $row['folio_servicio']; ?></span></td>
                                         <td><?php echo $row['unidad']; ?></td>
                                         <td><?php echo $row['operador']; ?></td>
                                         <td><?php echo $row['ruta_destino']; ?></td>
-                                        <td><strong><?php echo $row['pasajeros_pasajeras']; ?> pers.</strong></td>
-                                        <td><?php echo $row['fecha_servicio']; ?></td>
+                                        <td><strong><?php echo $row['pasajeros_pasajeras']; ?></strong> <small>(+<?php echo $row['acompanantes']; ?> ac.)</small></td>
                                         <td>
-                                            <?php if ($row['estatus_mantenimiento'] == 'En Operación Optima'): ?>
+                                            <?php echo $row['fecha_servicio']; ?><br>
+                                            <small style="color: #666;"><?php echo $row['hora_salida'] . ' - ' . $row['hora_regreso']; ?></small>
+                                        </td>
+                                        <td><?php echo ($km_recorridos > 0) ? $km_recorridos . ' km' : 'N/D'; ?></td>
+                                        <td>
+                                            <?php if ($estado_simple == 'Optimo'): ?>
                                                 <span class="status-ok">Óptimo</span>
                                             <?php else: ?>
                                                 <span class="status-mantenimiento">Mantenimiento</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td>
+                                            <button type="button" class="btn-accion" onclick="verDetalle('<?php echo $row['folio_servicio']; ?>', '<?php echo $row['unidad']; ?>', '<?php echo $row['operador']; ?>', '<?php echo $row['ruta_destino']; ?>', '<?php echo $row['tipo_servicio']; ?>', '<?php echo $row['pasajeros_pasajeras']; ?> pasajeros (+<?php echo $row['acompanantes']; ?> acompañantes)', '<?php echo $row['fecha_servicio'] . ' (' . $row['hora_salida'] . ' a ' . $row['hora_regreso'] . ')'; ?>', '<?php echo $km_recorridos; ?> km', '<?php echo $row['observaciones']; ?>', '<?php echo $row['usuario_atiende']; ?>')">Ver Ficha</button>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #888; padding: 25px;">No hay registros de transporte todavía.</td>
+                                    <td colspan="9" style="text-align: center; color: #888; padding: 25px;">No hay registros de transporte todavía.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -432,6 +549,83 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
 
         </div>
     </div>
+
+    <!-- Scripts Interactivos -->
+    <script>
+        // 1. Cálculo en tiempo real de Kilómetros
+        const kmInicialInput = document.getElementById('km_inicial');
+        const kmFinalInput = document.getElementById('km_final');
+        const kmCalculadoSpan = document.getElementById('kmCalculado');
+
+        function calcularKm() {
+            let inicial = parseInt(kmInicialInput.value) || 0;
+            let final = parseInt(kmFinalInput.value) || 0;
+            if (final > inicial) {
+                let total = final - inicial;
+                kmCalculadoSpan.textContent = `✓ Distancia calculada: ${total} km recorridos`;
+                kmCalculadoSpan.style.color = '#27ae60';
+            } else if (final > 0 && final < inicial) {
+                kmCalculadoSpan.textContent = `⚠ El km final no puede ser menor al inicial`;
+                kmCalculadoSpan.style.color = '#e74c3c';
+            } else {
+                kmCalculadoSpan.textContent = '';
+            }
+        }
+
+        kmInicialInput.addEventListener('input', calcularKm);
+        kmFinalInput.addEventListener('input', calcularKm);
+
+        // 2. Buscador en Tiempo Real
+        document.getElementById('buscadorTabla').addEventListener('keyup', function() {
+            let filtro = this.value.toLowerCase();
+            let filas = document.querySelectorAll('#tablaTransporte tbody tr');
+            
+            filas.forEach(fila => {
+                let textoFila = fila.textContent.toLowerCase();
+                fila.style.display = textoFila.includes(filtro) ? '' : 'none';
+            });
+        });
+
+        // 3. Filtros por Botones de Estado
+        function filtrarTabla(estado, btn) {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            let filas = document.querySelectorAll('#tablaTransporte tbody tr');
+            filas.forEach(fila => {
+                let estadoFila = fila.getAttribute('data-estado');
+                if (estado === 'todos' || estadoFila === estado) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // 4. Modal con SweetAlert2 para Ver Detalle del Servicio
+        function verDetalle(folio, unidad, operador, ruta, tipo, pasajeros, fecha, km, observaciones, usuario) {
+            Swal.fire({
+                title: `<span style="color: #8B0000;">Ficha de Servicio: ${folio}</span>`,
+                html: `
+                    <div style="text-align: left; font-size: 0.95em; line-height: 1.6; padding: 0 15px;">
+                        <p><strong>Unidad:</strong> ${unidad}</p>
+                        <p><strong>Operador:</strong> ${operador}</p>
+                        <p><strong>Ruta / Destino:</strong> ${ruta}</p>
+                        <p><strong>Tipo de Servicio:</strong> ${tipo}</p>
+                        <p><strong>Pasajeros:</strong> ${pasajeros}</p>
+                        <p><strong>Fecha y Horario:</strong> ${fecha}</p>
+                        <p><strong>Distancia Recorrida:</strong> ${km}</p>
+                        <p><strong>Observaciones:</strong> ${observaciones || 'Ninguna'}</p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd;">
+                        <p style="font-size: 0.85em; color: #666;">Registrado por el usuario: <strong>${usuario}</strong></p>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#601424',
+                width: '550px'
+            });
+        }
+    </script>
 
     <?php if (!empty($mensaje)): ?>
         <script>

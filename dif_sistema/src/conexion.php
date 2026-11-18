@@ -2,10 +2,10 @@
 // conexion.php - Archivo para establecer la conexión a la base de datos
 
 // --- CONFIGURACIÓN DE LA BASE DE DATOS ---
-$host = "localhost";
-$usuario_db = "root"; // Usuario por defecto de WAMP
-$contrasena_db = ""; // Contraseña por defecto de WAMP (probablemente vacía)
-$nombre_db = "sistema_dif"; 
+$host = "db";
+$usuario_db = "root";
+$contrasena_db = "12345";//Contraseña 12345
+$nombre_db = "sistema_dif";
 
 // Crear conexión
 $conexion = new mysqli($host, $usuario_db, $contrasena_db, $nombre_db);

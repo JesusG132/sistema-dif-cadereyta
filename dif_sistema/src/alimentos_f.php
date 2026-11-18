@@ -61,7 +61,6 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             color: #333;
         }
 
-        /* HEADER DEGRADADO MODERNO (IDÉNTICO A NUTRICIÓN) */
         .top-bar {
             background: linear-gradient(90deg, #601424 0%, #324355 100%);
             color: white;
@@ -139,9 +138,8 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             color: white;
         }
 
-        /* CONTENEDOR TARJETA PRINCIPAL */
         .main-card {
-            max-width: 1050px;
+            max-width: 1150px;
             margin: 35px auto;
             background: white;
             border-radius: 12px;
@@ -175,7 +173,6 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             padding-bottom: 5px;
         }
 
-        /* GRID FORMULARIO */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -215,7 +212,6 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             box-shadow: 0 0 0 3px rgba(96, 20, 36, 0.1);
         }
 
-        /* BOTÓN DE GUARDAR */
         .btn-submit-container {
             margin-top: 30px;
         }
@@ -238,9 +234,50 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             background-color: #219653;
         }
 
-        /* TABLA MODERNA DE REGISTROS */
         .table-section {
             margin-top: 40px;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 9px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-filter {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #555;
+            transition: 0.2s;
+        }
+
+        .btn-filter:hover, .btn-filter.active {
+            background: #2d3142;
+            color: white;
+            border-color: #2d3142;
         }
 
         .table-wrapper {
@@ -281,11 +318,25 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
             color: #8B0000;
             font-weight: 700;
         }
+
+        .btn-accion {
+            padding: 5px 10px;
+            background: #601424;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-accion:hover {
+            background: #400d17;
+        }
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR DEGRADADA -->
     <div class="top-bar">
         <div class="logo-section">
             <div class="logo-circle">
@@ -302,7 +353,6 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
         </div>
     </div>
 
-    <!-- TARJETA PRINCIPAL DEL FORMULARIO -->
     <div class="main-card">
         <div class="card-content">
             <h2 class="section-title">NUEVO REGISTRO DE ENTREGA</h2>
@@ -365,11 +415,22 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
                 </div>
             </form>
 
-            <!-- TABLA DE HISTORIAL RECIENTE -->
             <div class="table-section">
                 <div class="sub-header">3. HISTORIAL DE ENTREGAS REGISTRADAS</div>
+                
+                <!-- Controles interactivos de búsqueda y filtros -->
+                <div class="table-controls">
+                    <input type="text" id="buscadorTabla" class="search-box" placeholder="🔍 Buscar por folio, beneficiario, localidad o tipo de apoyo...">
+                    <div class="filter-buttons">
+                        <button class="btn-filter active" onclick="filtrarTabla('todos', this)">Todos</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Despensa Básica', this)">Despensas</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Desayunos Escolares', this)">Desayunos</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Adulto Mayor', this)">Adulto Mayor</button>
+                    </div>
+                </div>
+
                 <div class="table-wrapper">
-                    <table>
+                    <table id="tablaAlimentos">
                         <thead>
                             <tr>
                                 <th>Folio</th>
@@ -379,12 +440,19 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
                                 <th>Cant.</th>
                                 <th>Fecha</th>
                                 <th>Atendió</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if ($resultado_registros && $resultado_registros->num_rows > 0): ?>
-                                <?php while ($row = $resultado_registros->fetch_assoc()): ?>
-                                    <tr>
+                                <?php while ($row = $resultado_registros->fetch_assoc()): 
+                                    // Identificador simplificado para los filtros de botones
+                                    $tipo_corto = 'Otro';
+                                    if(strpos($row['tipo_apoyo'], 'Despensa') !== false) $tipo_corto = 'Despensa Básica';
+                                    elseif(strpos($row['tipo_apoyo'], 'Desayunos') !== false) $tipo_corto = 'Desayunos Escolares';
+                                    elseif(strpos($row['tipo_apoyo'], 'Adulto Mayor') !== false) $tipo_corto = 'Adulto Mayor';
+                                ?>
+                                    <tr data-tipo="<?php echo $tipo_corto; ?>">
                                         <td><span class="badge-folio"><?php echo $row['folio_apoyo']; ?></span></td>
                                         <td><?php echo $row['beneficiario']; ?></td>
                                         <td><?php echo $row['localidad']; ?></td>
@@ -392,11 +460,14 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
                                         <td><strong><?php echo $row['cantidad_paquetes']; ?></strong></td>
                                         <td><?php echo $row['fecha_entrega']; ?></td>
                                         <td><?php echo $row['usuario_atiende']; ?></td>
+                                        <td>
+                                            <button type="button" class="btn-accion" onclick="verDetalle('<?php echo $row['folio_apoyo']; ?>', '<?php echo $row['beneficiario']; ?>', '<?php echo $row['localidad']; ?>', '<?php echo $row['tipo_apoyo']; ?>', '<?php echo $row['cantidad_paquetes']; ?>', '<?php echo $row['fecha_entrega']; ?>', '<?php echo $row['observaciones']; ?>', '<?php echo $row['usuario_atiende']; ?>')">Ver Ficha</button>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #888; padding: 25px;">No hay registros de alimentos fríos todavía.</td>
+                                    <td colspan="8" style="text-align: center; color: #888; padding: 25px;">No hay registros de alimentos fríos todavía.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -407,7 +478,58 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_frios ORDER BY 
         </div>
     </div>
 
-    <!-- ALERTAS CON SWEETALERT -->
+    <!-- Scripts Interactivos -->
+    <script>
+        // 1. Buscador instantáneo en la tabla
+        document.getElementById('buscadorTabla').addEventListener('keyup', function() {
+            let filtro = this.value.toLowerCase();
+            let filas = document.querySelectorAll('#tablaAlimentos tbody tr');
+            
+            filas.forEach(fila => {
+                let textoFila = fila.textContent.toLowerCase();
+                fila.style.display = textoFila.includes(filtro) ? '' : 'none';
+            });
+        });
+
+        // 2. Filtros por botones de categoría
+        function filtrarTabla(categoria, btn) {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            let filas = document.querySelectorAll('#tablaAlimentos tbody tr');
+            filas.forEach(fila => {
+                let tipoFila = fila.getAttribute('data-tipo');
+                if (categoria === 'todos' || tipoFila === categoria) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // 3. Modal de Ficha detallada con SweetAlert2
+        function verDetalle(folio, beneficiario, localidad, tipo, cantidad, fecha, observaciones, usuario) {
+            Swal.fire({
+                title: `<span style="color: #8B0000;">Ficha de Entrega: ${folio}</span>`,
+                html: `
+                    <div style="text-align: left; font-size: 0.95em; line-height: 1.6; padding: 0 15px;">
+                        <p><strong>Beneficiario / Tutor:</strong> ${beneficiario}</p>
+                        <p><strong>Comunidad / Localidad:</strong> ${localidad}</p>
+                        <p><strong>Tipo de Apoyo:</strong> ${tipo}</p>
+                        <p><strong>Cantidad de Paquetes:</strong> ${cantidad}</p>
+                        <p><strong>Fecha de Entrega:</strong> ${fecha}</p>
+                        <p><strong>Observaciones:</strong> ${observaciones || 'Ninguna'}</p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd;">
+                        <p style="font-size: 0.85em; color: #666;">Registrado por el usuario: <strong>${usuario}</strong></p>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#601424',
+                width: '550px'
+            });
+        }
+    </script>
+
     <?php if (!empty($mensaje)): ?>
         <script>
             Swal.fire({

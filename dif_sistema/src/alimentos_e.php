@@ -136,7 +136,7 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
         }
 
         .main-card {
-            max-width: 1050px;
+            max-width: 1150px;
             margin: 35px auto;
             background: white;
             border-radius: 12px;
@@ -235,6 +235,48 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
             margin-top: 40px;
         }
 
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 9px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            outline: none;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-filter {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #555;
+            transition: 0.2s;
+        }
+
+        .btn-filter:hover, .btn-filter.active {
+            background: #2d3142;
+            color: white;
+            border-color: #2d3142;
+        }
+
         .table-wrapper {
             overflow-x: auto;
             border-radius: 8px;
@@ -272,6 +314,21 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
         .badge-folio {
             color: #8B0000;
             font-weight: 700;
+        }
+
+        .btn-accion {
+            padding: 5px 10px;
+            background: #601424;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-accion:hover {
+            background: #400d17;
         }
     </style>
 </head>
@@ -357,8 +414,20 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
 
             <div class="table-section">
                 <div class="sub-header">3. HISTORIAL DE COMEDORES Y DOTACIONES</div>
+                
+                <!-- Controles interactivos de búsqueda y filtros -->
+                <div class="table-controls">
+                    <input type="text" id="buscadorTabla" class="search-box" placeholder="🔍 Buscar por folio, comedor, localidad o programa...">
+                    <div class="filter-buttons">
+                        <button class="btn-filter active" onclick="filtrarTabla('todos', this)">Todos</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Desayuno Escolar', this)">Desayunos</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Comedor Comunitario', this)">Comedores</button>
+                        <button class="btn-filter" onclick="filtrarTabla('Insumos Cocina', this)">Insumos</button>
+                    </div>
+                </div>
+
                 <div class="table-wrapper">
-                    <table>
+                    <table id="tablaAlimentosCalientes">
                         <thead>
                             <tr>
                                 <th>Folio</th>
@@ -368,12 +437,18 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
                                 <th>Raciones/Día</th>
                                 <th>Fecha</th>
                                 <th>Atendió</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if ($resultado_registros && $resultado_registros->num_rows > 0): ?>
-                                <?php while ($row = $resultado_registros->fetch_assoc()): ?>
-                                    <tr>
+                                <?php while ($row = $resultado_registros->fetch_assoc()): 
+                                    $programa_corto = 'Otro';
+                                    if(strpos($row['tipo_programa'], 'Desayuno') !== false) $programa_corto = 'Desayuno Escolar';
+                                    elseif(strpos($row['tipo_programa'], 'Comedor Comunitario') !== false) $programa_corto = 'Comedor Comunitario';
+                                    elseif(strpos($row['tipo_programa'], 'Insumos') !== false) $programa_corto = 'Insumos Cocina';
+                                ?>
+                                    <tr data-programa="<?php echo $programa_corto; ?>">
                                         <td><span class="badge-folio"><?php echo $row['folio_apoyo']; ?></span></td>
                                         <td><?php echo $row['comedor_escuela']; ?></td>
                                         <td><?php echo $row['localidad']; ?></td>
@@ -381,11 +456,14 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
                                         <td><strong><?php echo $row['raciones_diarias']; ?> hab.</strong></td>
                                         <td><?php echo $row['fecha_entrega']; ?></td>
                                         <td><?php echo $row['usuario_atiende']; ?></td>
+                                        <td>
+                                            <button type="button" class="btn-accion" onclick="verDetalle('<?php echo $row['folio_apoyo']; ?>', '<?php echo $row['comedor_escuela']; ?>', '<?php echo $row['localidad']; ?>', '<?php echo $row['tipo_programa']; ?>', '<?php echo $row['raciones_diarias']; ?>', '<?php echo $row['fecha_entrega']; ?>', '<?php echo $row['observaciones']; ?>', '<?php echo $row['usuario_atiende']; ?>')">Ver Ficha</button>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #888; padding: 25px;">No hay registros de alimentos calientes todavía.</td>
+                                    <td colspan="8" style="text-align: center; color: #888; padding: 25px;">No hay registros de alimentos calientes todavía.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -395,6 +473,58 @@ $resultado_registros = $conexion->query("SELECT * FROM alimentos_calientes ORDER
 
         </div>
     </div>
+
+    <!-- Scripts Interactivos -->
+    <script>
+        // 1. Buscador instantáneo en la tabla
+        document.getElementById('buscadorTabla').addEventListener('keyup', function() {
+            let filtro = this.value.toLowerCase();
+            let filas = document.querySelectorAll('#tablaAlimentosCalientes tbody tr');
+            
+            filas.forEach(fila => {
+                let textoFila = fila.textContent.toLowerCase();
+                fila.style.display = textoFila.includes(filtro) ? '' : 'none';
+            });
+        });
+
+        // 2. Filtros por botones de categoría
+        function filtrarTabla(programa, btn) {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            let filas = document.querySelectorAll('#tablaAlimentosCalientes tbody tr');
+            filas.forEach(fila => {
+                let progFila = fila.getAttribute('data-programa');
+                if (programa === 'todos' || progFila === programa) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // 3. Modal de Ficha detallada con SweetAlert2
+        function verDetalle(folio, comedor, localidad, programa, raciones, fecha, observaciones, usuario) {
+            Swal.fire({
+                title: `<span style="color: #8B0000;">Ficha de Dotación: ${folio}</span>`,
+                html: `
+                    <div style="text-align: left; font-size: 0.95em; line-height: 1.6; padding: 0 15px;">
+                        <p><strong>Comedor / Escuela:</strong> ${comedor}</p>
+                        <p><strong>Comunidad / Localidad:</strong> ${localidad}</p>
+                        <p><strong>Tipo de Programa:</strong> ${programa}</p>
+                        <p><strong>Raciones Diarias:</strong> ${raciones} beneficiarios</p>
+                        <p><strong>Fecha de Entrega:</strong> ${fecha}</p>
+                        <p><strong>Observaciones / Insumos:</strong> ${observaciones || 'Ninguna'}</p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd;">
+                        <p style="font-size: 0.85em; color: #666;">Registrado por el usuario: <strong>${usuario}</strong></p>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#601424',
+                width: '550px'
+            });
+        }
+    </script>
 
     <?php if (!empty($mensaje)): ?>
         <script>
