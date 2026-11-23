@@ -3,7 +3,11 @@ session_start();
 include 'conexion.php';
 
 if (!isset($_SESSION['usuario'])) {
-    header("Location: index.php");
+    header("Location: index.html");
+    exit();
+}
+if (!in_array($_SESSION['rol'] ?? '', ['Admin', 'Transporte'])) {
+    header("Location: panel.php");
     exit();
 }
 
@@ -511,7 +515,7 @@ $resultado_registros = $conexion->query("SELECT * FROM transporte ORDER BY id_tr
                         <tbody>
                             <?php if ($resultado_registros && $resultado_registros->num_rows > 0): ?>
                                 <?php while ($row = $resultado_registros->fetch_assoc()): 
-                                    $km_recorridos = ($row['km_final'] > $row['km_inicial']) ? ($row['km_final'] - $row['km_inicial']) : 0;
+                                   $km_recorridos = (($row['km_final'] ?? 0) > ($row['km_inicial'] ?? 0)) ? (($row['km_final'] ?? 0) - ($row['km_inicial'] ?? 0)) : 0;
                                     $estado_simple = (strpos($row['estatus_mantenimiento'], 'Optima') !== false) ? 'Optimo' : 'Mantenimiento';
                                 ?>
                                     <tr data-estado="<?php echo $estado_simple; ?>">

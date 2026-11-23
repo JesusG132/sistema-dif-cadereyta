@@ -4,7 +4,11 @@ include 'conexion.php';
 
 // Validar si el usuario ha iniciado sesión
 if (!isset($_SESSION['usuario'])) {
-    header("Location: index.php");
+    header("Location: index.html");
+    exit();
+}
+if (!in_array($_SESSION['rol'] ?? '', ['Admin', 'Alimentos F'])) {
+    header("Location: panel.php");
     exit();
 }
 

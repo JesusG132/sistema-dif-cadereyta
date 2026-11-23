@@ -117,13 +117,20 @@
         <p class="footer">© Cadereyta de Montes, Querétaro</p>
     </div>
 
-    <script>
-        // Si el login falla, avisamos al usuario
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('error')) {
-            alert("Usuario o contraseña incorrectos.");
-        }
+   <script>
+        fetch('obtener_error_login.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acceso denegado',
+                        text: data.error,
+                        confirmButtonColor: '#8B0000'
+                    });
+                }
+            })
+            .catch(() => {});
     </script>
-
 </body>
 </html>

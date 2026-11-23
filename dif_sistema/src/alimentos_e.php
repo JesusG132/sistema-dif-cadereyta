@@ -3,7 +3,11 @@ session_start();
 include 'conexion.php';
 
 if (!isset($_SESSION['usuario'])) {
-    header("Location: index.php");
+    header("Location: index.html");
+    exit();
+}
+if (!in_array($_SESSION['rol'] ?? '', ['Admin', 'Alimentos E'])) {
+    header("Location: panel.php");
     exit();
 }
 

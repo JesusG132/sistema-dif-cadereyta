@@ -1,5 +1,5 @@
 <?php
-// panel.php - Panel de Control Rediseñado
+// panel.php - Panel de Control con permisos por departamento
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -7,9 +7,13 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-$rol_usuario = $_SESSION['rol'];
-?>
+$rol_usuario = $_SESSION['rol'] ?? '';
 
+$puede_nutricion   = in_array($rol_usuario, ['Admin', 'Nutri']);
+$puede_alimentos_f = in_array($rol_usuario, ['Admin', 'Alimentos F']);
+$puede_alimentos_e = in_array($rol_usuario, ['Admin', 'Alimentos E']);
+$puede_transporte  = in_array($rol_usuario, ['Admin', 'Transporte']);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,11 +24,10 @@ $rol_usuario = $_SESSION['rol'];
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
-            --primary: #6d1b2b;       /* Vino Profundo */
-            --secondary: #2c3e50;     /* Gris Acero */
-            --bg-color: #f0f2f5;      /* Fondo Suave */
+            --primary: #6d1b2b;
+            --secondary: #2c3e50;
+            --bg-color: #f0f2f5;
             --white: #ffffff;
-            --gray-disabled: #e9ecef;
         }
 
         body {
@@ -35,7 +38,6 @@ $rol_usuario = $_SESSION['rol'];
             color: #333;
         }
 
-        /* --- HEADER (Igual a Nutrición) --- */
         .header-principal {
             background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%);
             padding: 15px 40px;
@@ -47,7 +49,7 @@ $rol_usuario = $_SESSION['rol'];
         }
 
         .header-brand { display: flex; align-items: center; gap: 20px; }
-        
+
         .logo-img {
             height: 65px;
             width: 65px;
@@ -75,7 +77,6 @@ $rol_usuario = $_SESSION['rol'];
         }
         .btn-logout:hover { background: white; color: var(--primary); font-weight: bold; }
 
-        /* --- CONTENEDOR PRINCIPAL --- */
         .container {
             max-width: 1100px;
             margin: 50px auto;
@@ -96,7 +97,6 @@ $rol_usuario = $_SESSION['rol'];
         .welcome-card h2 { margin: 0 0 10px 0; color: var(--secondary); font-size: 1.8em; }
         .welcome-card p { margin: 0; color: #666; font-size: 1.1em; }
 
-        /* --- GRID DE MÓDULOS --- */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -123,7 +123,7 @@ $rol_usuario = $_SESSION['rol'];
 
         .module-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(109, 27, 43, 0.15); /* Sombra Vino */
+            box-shadow: 0 15px 35px rgba(109, 27, 43, 0.15);
             border-color: rgba(109, 27, 43, 0.1);
         }
 
@@ -159,7 +159,6 @@ $rol_usuario = $_SESSION['rol'];
             margin-top: 10px;
         }
 
-        /* --- ESTADO DESHABILITADO --- */
         .module-card.disabled {
             background-color: #fcfcfc;
             opacity: 0.7;
@@ -175,7 +174,6 @@ $rol_usuario = $_SESSION['rol'];
             font-size: 0.9em;
             color: #888;
         }
-        
     </style>
 </head>
 <body>
@@ -192,58 +190,56 @@ $rol_usuario = $_SESSION['rol'];
     </nav>
 
     <div class="container">
-        
+
         <div class="welcome-card">
             <h2>¡Hola, <?php echo htmlspecialchars($_SESSION['usuario']); ?>!</h2>
             <p>Bienvenido al sistema. Selecciona el módulo al que deseas acceder.</p>
         </div>
 
         <div class="dashboard-grid">
-            
-            <a href="nutricion.php" class="module-card">
+
+            <a href="<?php echo $puede_nutricion ? 'nutricion.php' : '#'; ?>"
+               class="module-card <?php echo $puede_nutricion ? '' : 'disabled'; ?>">
                 <div class="icon-circle">🍎</div>
                 <div class="module-title">Nutrición</div>
-                <div class="module-status">Acceso Permitido</div>
+                <div class="module-status">
+                    <?php echo $puede_nutricion ? 'Acceso Permitido' : 'Restringido'; ?>
+                </div>
             </a>
-            
-           <a href="alimentos_f.php" class="module-card">
-    <div class="icon-circle">🍞</div>
-    <div class="module-title">Alimentos F</div>
-    <div class="module-status">Acceso Permitido</div>
-</a>
-            
-            <a href="alimentos_e.php" class="module-card">
-    <div class="icon-circle">🥛</div>
-    <div class="module-title">Alimentos E</div>
-    <div class="module-status">Acceso Permitido</div>
-</a>
-            
-            <a href="transporte.php" class="module-card <?php echo ($rol_usuario == 'Admin') ? '' : 'disabled'; ?>">
+
+            <a href="<?php echo $puede_alimentos_f ? 'alimentos_f.php' : '#'; ?>"
+               class="module-card <?php echo $puede_alimentos_f ? '' : 'disabled'; ?>">
+                <div class="icon-circle">🍞</div>
+                <div class="module-title">Alimentos F</div>
+                <div class="module-status">
+                    <?php echo $puede_alimentos_f ? 'Acceso Permitido' : 'Restringido'; ?>
+                </div>
+            </a>
+
+            <a href="<?php echo $puede_alimentos_e ? 'alimentos_e.php' : '#'; ?>"
+               class="module-card <?php echo $puede_alimentos_e ? '' : 'disabled'; ?>">
+                <div class="icon-circle">🥛</div>
+                <div class="module-title">Alimentos E</div>
+                <div class="module-status">
+                    <?php echo $puede_alimentos_e ? 'Acceso Permitido' : 'Restringido'; ?>
+                </div>
+            </a>
+
+            <a href="<?php echo $puede_transporte ? 'transporte.php' : '#'; ?>"
+               class="module-card <?php echo $puede_transporte ? '' : 'disabled'; ?>">
                 <div class="icon-circle">🚌</div>
                 <div class="module-title">Transporte</div>
                 <div class="module-status">
-                    <?php echo ($rol_usuario == 'Admin') ? 'Acceso Permitido' : 'Restringido (Solo Admin)'; ?>
+                    <?php echo $puede_transporte ? 'Acceso Permitido' : 'Restringido'; ?>
                 </div>
             </a>
 
         </div>
 
         <div class="footer-role">
-            Rol actual: <span style="color: var(--primary); font-weight: bold;"><?php echo $rol_usuario; ?></span>
+            Rol actual: <span style="color: var(--primary); font-weight: bold;"><?php echo htmlspecialchars($rol_usuario ?: 'Sin rol'); ?></span>
         </div>
     </div>
-
-    <?php if(isset($_SESSION['mensaje_exito'])): ?>
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: '¡Bienvenido!',
-            text: '<?php echo $_SESSION['mensaje_exito']; ?>',
-            confirmButtonColor: '#6d1b2b',
-            timer: 2000
-        });
-    </script>
-    <?php unset($_SESSION['mensaje_exito']); endif; ?>
 
 </body>
 </html>
